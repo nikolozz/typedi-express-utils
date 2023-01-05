@@ -1,31 +1,6 @@
 import 'reflect-metadata';
-import Container, { Token } from 'typedi';
-
-export const MetadataTypes = {
-  Prefix: Symbol.for('PREFIX'),
-  Routes: Symbol.for('ROUTES'),
-  Params: Symbol.for('PARAMS'),
-};
-
-export const ContainerTypes = {
-  Controller: new Token('CONTROLLER'),
-};
-
-export type RequestMethods = 'get' | 'post' | 'put' | 'delete' | 'patch';
-export type ClassType = new (...args: any) => any;
-
-export interface Route {
-  requestMethod: RequestMethods;
-  path: string;
-  method: string;
-}
-
-export enum ParametersType {
-  Param,
-  Body,
-  Req,
-  Res,
-}
+import { controllers, MetadataTypes } from './constants';
+import { ParametersType, RequestMethods } from './interfaces';
 
 const parametersDecoratorFactory = (
   type: ParametersType,
@@ -62,13 +37,9 @@ const methodDecoratorFactory = (
 
 export const Controller = (path: string = ''): ClassDecorator => {
   return (target: Function) => {
+    controllers.add(target);
+
     Reflect.defineMetadata(MetadataTypes.Prefix, path, target);
-
-    const restControllers = Container.has(ContainerTypes.Controller)
-      ? Container.get<object[]>(ContainerTypes.Controller)
-      : [];
-
-    Container.set(ContainerTypes.Controller, restControllers.concat(target));
   };
 };
 
